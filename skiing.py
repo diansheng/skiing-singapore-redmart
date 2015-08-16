@@ -62,7 +62,7 @@ def explore_start_from_value(start_value):
             cml=length;cmd=drop;
         elif length==cml and drop>cmd:
             cmd=drop
-    #print "start_value=%d  length=%d  drop=%d" % (start_value,cml,cmd)
+    print "start_value=%d  length=%d  drop=%d" % (start_value,cml,cmd)
     return cml,cmd
  
 #init
