@@ -69,7 +69,7 @@ def explore_start_from_value(start_value):
 start_time=time.time()
 #data_matrix=np.array([[4,8,7,3],[2,5,9,3],[6,3,2,5],[4,4,1,6]])
 data_matrix=np.loadtxt('map.txt',skiprows=1)
-data_matrix=data_matrix[:300,:300]
+#data_matrix=data_matrix[:300,:300]
 [l_row,l_col]=data_matrix.shape
 cost_matrix=np.ones(data_matrix.shape)
 
