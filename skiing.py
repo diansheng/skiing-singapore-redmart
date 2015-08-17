@@ -62,14 +62,15 @@ def explore_start_from_value(start_value):
             cml=length;cmd=drop;
         elif length==cml and drop>cmd:
             cmd=drop
-    print "start_value=%d  length=%d  drop=%d" % (start_value,cml,cmd)
+    #print "start_value=%d  length=%d  drop=%d" % (start_value,cml,cmd)
     return cml,cmd
  
 #init
 start_time=time.time()
 #data_matrix=np.array([[4,8,7,3],[2,5,9,3],[6,3,2,5],[4,4,1,6]])
 data_matrix=np.loadtxt('map.txt',skiprows=1)
-#data_matrix=data_matrix[:300,:300]
+sdms=200#sub data matrix size
+data_matrix=data_matrix[:sdms,:sdms]
 [l_row,l_col]=data_matrix.shape
 cost_matrix=np.ones(data_matrix.shape)
 

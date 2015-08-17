@@ -57,8 +57,7 @@ def explore_start_from_value(start_value,data_matrix):
         #length,end_value=explore_start_from_position(start_i,start_j)
         # approach 2, used for large data matrix
         length,end_value=get_max_cost_for_position(start_i,start_j)
-        drop=start_value-end_value+1
-        print "start, end %d %d" % (start_value,end_value)
+        drop=start_value-end_value
         if length>cml:
             cml=length;cmd=drop;
         elif length==cml and drop>cmd:
@@ -81,17 +80,15 @@ def get_max_cost_for_position(i,j):
     #print "p,q,m,n %d %d %d %d " %(p,q,m,n)
     #raw_input()
     max_cost=cost_6d[p,q,m,n].max()
-    end_value=data_matrix[i,j]
     
     #among multiple longest paths, pick the lowest end point
-    indices = np.where(cost_6d[p,q,m,n] == max_cost)
-    costplus=0
+    indices = np.where(cost_6d[p,q,m,n] >0 )
+    end_value=(data_4d[p,q][np.where(cost_6d[p,q,m,n]==max_cost)]).min()
     
     for k in range(indices[0].size):
         k_i=indices[0][k];k_j=indices[1][k];
-    #    print "ki,kj %d %d" %(k_i, k_j)
-        if end_value>data_4d[p,q,k_i,k_j]:
-            end_value=data_4d[p,q,k_i,k_j]
+        #print "ki,kj %d %d" %(k_i, k_j)
+        k_cost=cost_6d[p,q,m,n,k_i,k_j]
         #if end value is one upper or lower border of atom cost matrix
         #, search further in adjacent atom cost matrix
         border_flag=False
@@ -102,15 +99,14 @@ def get_max_cost_for_position(i,j):
             border_flag=True
             next_i,next_j=convert_coordinate_4d_to_2d(p+1,q,0,k_j)
         if border_flag and data_matrix[next_i,next_j]<data_4d[p,q,k_i,k_j]:
-      #      print "debug: next_i=%d next_j=%d" % (next_i,next_j)
-     #       raw_input()#put raw input to pause for debugging purpose
+            #print "debug: next_i=%d next_j=%d" % (next_i,next_j)
+            #raw_input()#put raw input to pause for debugging purpose
             tmp_cost,tmp_value=get_max_cost_for_position(next_i,next_j)
-            if tmp_cost>costplus:
-                costplus=tmp_cost
+            if (tmp_cost+k_cost)>max_cost:
+                max_cost=(tmp_cost+k_cost)
                 end_value=tmp_value
-            elif tmp_cost==costplus:
-                if tmp_value<end_value:
-                    end_value=tmp_value
+            elif tmp_cost==max_cost:
+                end_value=min(end_value,tmp_value) 
         border_flag=False
         #if end value is one left or right border of atom cost matrix
         #, search further in adjacent atom cost matrix
@@ -121,29 +117,28 @@ def get_max_cost_for_position(i,j):
             border_flag=True
             next_i,next_j=convert_coordinate_4d_to_2d(p,q+1,k_i,0)
         if border_flag and data_matrix[next_i,next_j]<data_4d[p,q,k_i,k_j]:
-      #      print "debug: next_i=%d next_j=%d" % (next_i,next_j)
+            #print "debug: next_i=%d next_j=%d" % (next_i,next_j)
+            #raw_input()#put raw input to pause for debugging purpose
             tmp_cost,tmp_value=get_max_cost_for_position(next_i,next_j)
-            if tmp_cost>costplus:
-                costplus=tmp_cost
+            if (tmp_cost+k_cost)>max_cost:
+                max_cost=(tmp_cost+k_cost)
                 end_value=tmp_value
-            elif tmp_cost==costplus:
-                if tmp_value<end_value:
-                    end_value=tmp_value    
-    max_cost=max_cost+costplus
-    
+            elif tmp_cost==max_cost:
+                end_value=min(end_value,tmp_value)       
     return max_cost,end_value
 
 #init
 start_time=time.time()
 #data_matrix=np.array([[4,8,7,3],[2,5,9,3],[6,3,2,5],[4,4,1,6]])
-data_matrix=np.loadtxt('map2.txt',skiprows=1)
-data_matrix=data_matrix[:4,:4]
+data_matrix=np.loadtxt('map.txt',skiprows=1)
+sdms=400#sub data matrix size
+data_matrix=data_matrix[:sdms,:sdms]
 #print data_matrix
 #assign data type
 data_matrix.astype(int)
 [l_row,l_col]=data_matrix.shape
 #size of atom matrix, smallest matrix used to calculate cost
-a_row=2;a_col=2;
+a_row=a_col=20;
 #size of macro matrix, used to reshape data_matrix into data_4d
 m_row=l_row/a_row;m_col=l_col/a_col;
 #print m_row
