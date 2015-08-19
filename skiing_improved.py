@@ -130,8 +130,8 @@ def get_max_cost_for_position(i,j):
 #init
 start_time=time.time()
 #data_matrix=np.array([[4,8,7,3],[2,5,9,3],[6,3,2,5],[4,4,1,6]])
-data_matrix=np.loadtxt('map.txt',skiprows=1)
-sdms=400#sub data matrix size
+data_matrix=np.loadtxt('map.txt',skiprows=1,dtype=np.int16)
+sdms=1000#sub data matrix size
 data_matrix=data_matrix[:sdms,:sdms]
 #print data_matrix
 #assign data type
@@ -148,7 +148,7 @@ data_3d=np.asarray(np.split(data_matrix,m_col,axis=1))
 data_4d=np.asarray(np.split(data_3d,m_row,axis=1))
 #print data_4d
 #init empty cost matrix 6d
-cost_6d=np.zeros([m_row, m_col, a_row, a_col, a_row, a_col])
+cost_6d=np.zeros([m_row, m_col, a_row, a_col, a_row, a_col],dtype=np.int16)
 
 #init cost matrix 6d
 print "initiate 6d cost matrix..."
