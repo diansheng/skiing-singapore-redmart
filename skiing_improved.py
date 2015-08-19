@@ -19,33 +19,7 @@ def deep_search(i,j,data_matrix,cost_matrix):
                 deep_search(next_i,next_j,data_matrix,cost_matrix)
         dir_vector=transform_matrix.dot(dir_vector)
 
-def explore_start_from_position(start_i,start_j):
-    #print "start position: (%d,%d), starting value= %d" % (start_i,start_j,start_value)
-    start_value=data_matrix[start_i,start_j]
-    log="start value:%d\tstart position:(%d,%d)" % (start_value,start_i,start_j)
-    #clear cost matrix each time starting from a new position
-    cost_matrix=np.zeros(data_matrix.shape)
-    cost_matrix[start_i,start_j]=1
-    #calculate
-    deep_search(start_i,start_j,data_matrix,cost_matrix)
-    
-    #post process
-    #print "cost matrix"
-    #print cost_matrix
-    #get the longest length
-    length=cost_matrix.max()
-    #among multiple longest paths, pick the lowest end point
-    indices = np.where(cost_matrix == length)
-    end_value=data_matrix[indices].min()
-    log="length=%d\tend value=%d\t" % (length,end_value) +log
-    time1=[]
-    time1.append(time.time()-start_time)
-    #print log
-    #print "computation time=%fsecs" % (time1[0])
-    return length,end_value
-
 def explore_start_from_value(start_value,data_matrix):
-    #print "start value: %d" % start_value    
     indices = np.where( data_matrix ==  start_value)
     #print "there is(are) %d start position(s)." % indices[0].size
     
@@ -53,8 +27,6 @@ def explore_start_from_value(start_value,data_matrix):
     for i in range(indices[0].size):
         start_i=indices[0][i]
         start_j=indices[1][i];
-        # approach 1, used for small data matrix
-        #length,end_value=explore_start_from_position(start_i,start_j)
         # approach 2, used for large data matrix
         length,end_value=get_max_cost_for_position(start_i,start_j)
         drop=start_value-end_value
@@ -85,6 +57,7 @@ def get_max_cost_for_position(i,j):
     indices = np.where(cost_6d[p,q,m,n] >0 )
     end_value=(data_4d[p,q][np.where(cost_6d[p,q,m,n]==max_cost)]).min()
     
+    #loop through every point on the border of atom cost matrix, in order to explore further to other atom data matrix
     for k in range(indices[0].size):
         k_i=indices[0][k];k_j=indices[1][k];
         #print "ki,kj %d %d" %(k_i, k_j)
@@ -99,8 +72,6 @@ def get_max_cost_for_position(i,j):
             border_flag=True
             next_i,next_j=convert_coordinate_4d_to_2d(p+1,q,0,k_j)
         if border_flag and data_matrix[next_i,next_j]<data_4d[p,q,k_i,k_j]:
-            #print "debug: next_i=%d next_j=%d" % (next_i,next_j)
-            #raw_input()#put raw input to pause for debugging purpose
             tmp_cost,tmp_value=get_max_cost_for_position(next_i,next_j)
             if (tmp_cost+k_cost)>max_cost:
                 max_cost=(tmp_cost+k_cost)
@@ -117,8 +88,6 @@ def get_max_cost_for_position(i,j):
             border_flag=True
             next_i,next_j=convert_coordinate_4d_to_2d(p,q+1,k_i,0)
         if border_flag and data_matrix[next_i,next_j]<data_4d[p,q,k_i,k_j]:
-            #print "debug: next_i=%d next_j=%d" % (next_i,next_j)
-            #raw_input()#put raw input to pause for debugging purpose
             tmp_cost,tmp_value=get_max_cost_for_position(next_i,next_j)
             if (tmp_cost+k_cost)>max_cost:
                 max_cost=(tmp_cost+k_cost)
@@ -127,7 +96,7 @@ def get_max_cost_for_position(i,j):
                 end_value=min(end_value,tmp_value)       
     return max_cost,end_value
 
-#init
+#init data matrix
 start_time=time.time()
 #data_matrix=np.array([[4,8,7,3],[2,5,9,3],[6,3,2,5],[4,4,1,6]])
 data_matrix=np.loadtxt('map.txt',skiprows=1,dtype=np.int16)
@@ -160,13 +129,14 @@ for p in range(m_row):
                 deep_search(i,j,data_4d[p,q],cost_6d[p,q,i,j])
 print "cost matrix initated, cost %f secs" % (time.time()-start_time)
 
-#prepare
+#prepare value list
 value_list=data_matrix.ravel()
 value_list=np.unique(value_list)
 value_list=value_list[::-1]
 sv=value_list[value_list.size-1]#smallest value
 cml=1;cmd=0;   #current_max_length, current_max_drop
 
+#search
 for index in range(value_list.size):
     cv=value_list[index]    #current value
     lpl=cv-sv+1   #longest possible length for those starting values < current value
